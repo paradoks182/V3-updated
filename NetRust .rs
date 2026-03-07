@@ -1,4 +1,3 @@
-// src/main.rs
 use std::net::{IpAddr, Ipv4Addr, SocketAddr};
 use std::time::Duration;
 use std::sync::Arc;
@@ -33,116 +32,96 @@ use whois_rust::{WhoIs, WhoIsLookupOptions};
 use std::net::UdpSocket;
 
 #[derive(Parser)]
-#[clap(author = "Elliot", version = "1.0.0", about = "Advanced Network Security Scanner")]
+#[clap(author = "h3Dr1per", version = "1.0.0", about = "NetRust")]
 struct Cli {
     #[clap(subcommand)]
     command: Commands,
     
-    /// Output format (json, yaml, table)
     #[clap(short, long, default_value = "table")]
     format: String,
     
-    /// Thread count for parallel scanning
     #[clap(short, long, default_value_t = 100)]
     threads: usize,
     
-    /// Timeout in milliseconds
     #[clap(short, long, default_value_t = 1000)]
     timeout: u64,
 }
 
 #[derive(Subcommand)]
 enum Commands {
-    /// Fast port scanner
+
     Scan {
-        /// Target IP or hostname
+
         target: String,
         
-        /// Port range (e.g., 1-1000 or 80,443,8080)
         #[clap(short, long, default_value = "1-1024")]
         ports: String,
         
-        /// Perform service detection
         #[clap(short, long)]
         service: bool,
         
-        /// Get banners from services
         #[clap(short, long)]
         banner: bool,
     },
     
-    /// Network discovery
     Discover {
-        /// Network in CIDR notation (e.g., 192.168.1.0/24)
         network: String,
         
-        /// Ping sweep
+
         #[clap(short, long)]
         ping: bool,
         
-        /// ARP scan (requires root)
         #[clap(short, long)]
         arp: bool,
     },
     
-    /// DNS enumeration
+
     Dns {
-        /// Domain to enumerate
+
         domain: String,
         
-        /// Perform DNS zone transfer
+
         #[clap(short, long)]
         zone: bool,
         
-        /// Subdomain brute force
+
         #[clap(short, long)]
         brute: bool,
         
-        /// Wordlist file for brute force
+
         #[clap(short, long)]
         wordlist: Option<String>,
     },
     
-    /// HTTP/S web scanner
     Web {
-        /// Target URL
         url: String,
         
-        /// Check for common vulnerabilities
         #[clap(short, long)]
         vuln: bool,
         
-        /// Directory brute force
         #[clap(short, long)]
         dirb: bool,
         
-        /// Wordlist for directory brute force
         #[clap(short, long)]
         wordlist: Option<String>,
     },
     
-    /// Geolocation lookup
     Geoip {
-        /// IP address to locate
         ip: String,
     },
     
-    /// MAC address vendor lookup
     Mac {
-        /// MAC address to lookup
         mac: String,
     },
     
-    /// Network speed test
     Speedtest,
     
-    /// Packet capture
     Capture {
-        /// Interface to capture on
+      
         #[clap(short, long)]
         interface: String,
         
-        /// Number of packets to capture
+      
         #[clap(short, long, default_value_t = 100)]
         count: usize,
     },
@@ -206,7 +185,7 @@ impl Scanner {
                     banner: None,
                 };
                 
-                // Service detection
+
                 if let Some(service) = self.detect_service(port) {
                     result.service = Some(service);
                 }
@@ -289,14 +268,14 @@ fn parse_port_range(port_str: &str) -> Vec<u16> {
     let mut ports = vec![];
     
     if port_str.contains(',') {
-        // Comma-separated list
+
         for part in port_str.split(',') {
             if let Ok(port) = part.trim().parse::<u16>() {
                 ports.push(port);
             }
         }
     } else if port_str.contains('-') {
-        // Range
+
         let parts: Vec<&str> = port_str.split('-').collect();
         if parts.len() == 2 {
             if let (Ok(start), Ok(end)) = (parts[0].parse::<u16>(), parts[1].parse::<u16>()) {
@@ -306,7 +285,7 @@ fn parse_port_range(port_str: &str) -> Vec<u16> {
             }
         }
     } else {
-        // Single port
+
         if let Ok(port) = port_str.parse::<u16>() {
             ports.push(port);
         }
@@ -317,7 +296,7 @@ fn parse_port_range(port_str: &str) -> Vec<u16> {
 
 async fn scan_command(target: String, port_str: String, service: bool, banner: bool) -> Result<(), Box<dyn std::error::Error>> {
     println!("{}", "╔══════════════════════════════════════════════════════════╗".bright_blue());
-    println!("{}", "║                 RUST PORT SCANNER v1.0                  ║".bright_blue());
+    println!("{}", "║                 NetRust v1.0                             ║".bright_blue());
     println!("{}", "╚══════════════════════════════════════════════════════════╝".bright_blue());
     println!();
     
@@ -367,7 +346,7 @@ async fn scan_command(target: String, port_str: String, service: bool, banner: b
 
 async fn discover_command(network: String, ping: bool, arp: bool) -> Result<(), Box<dyn std::error::Error>> {
     println!("{}", "╔══════════════════════════════════════════════════════════╗".bright_blue());
-    println!("{}", "║                 NETWORK DISCOVERY v1.0                  ║".bright_blue());
+    println!("{}", "║                 NETWORK DISCOVERY v1.0                   ║".bright_blue());
     println!("{}", "╚══════════════════════════════════════════════════════════╝".bright_blue());
     println!();
     
@@ -416,7 +395,7 @@ async fn discover_command(network: String, ping: bool, arp: bool) -> Result<(), 
 
 async fn dns_command(domain: String, zone: bool, brute: bool, wordlist: Option<String>) -> Result<(), Box<dyn std::error::Error>> {
     println!("{}", "╔══════════════════════════════════════════════════════════╗".bright_blue());
-    println!("{}", "║                 DNS ENUMERATION v1.0                    ║".bright_blue());
+    println!("{}", "║                 DNS ENUMERATION v1.0                     ║".bright_blue());
     println!("{}", "╚══════════════════════════════════════════════════════════╝".bright_blue());
     println!();
     
@@ -425,15 +404,14 @@ async fn dns_command(domain: String, zone: bool, brute: bool, wordlist: Option<S
     
     let resolver = Resolver::new(ResolverConfig::default(), ResolverOpts::default())?;
     
-    // A records
+
     if let Ok(response) = resolver.lookup_ip(&domain) {
         println!("{} A Records:", "[+]".green());
         for ip in response.iter() {
             println!("  {}", ip);
         }
     }
-    
-    // MX records
+
     if let Ok(response) = resolver.mx_lookup(&domain) {
         println!("\n{} MX Records:", "[+]".green());
         for mx in response.iter() {
@@ -441,7 +419,7 @@ async fn dns_command(domain: String, zone: bool, brute: bool, wordlist: Option<S
         }
     }
     
-    // NS records
+
     if let Ok(response) = resolver.ns_lookup(&domain) {
         println!("\n{} NS Records:", "[+]".green());
         for ns in response.iter() {
@@ -449,7 +427,7 @@ async fn dns_command(domain: String, zone: bool, brute: bool, wordlist: Option<S
         }
     }
     
-    // TXT records
+
     if let Ok(response) = resolver.txt_lookup(&domain) {
         println!("\n{} TXT Records:", "[+]".green());
         for txt in response.iter() {
@@ -459,13 +437,13 @@ async fn dns_command(domain: String, zone: bool, brute: bool, wordlist: Option<S
         }
     }
     
-    // Zone transfer
+
     if zone {
         println!("\n{} Attempting zone transfer...", "[*]".yellow());
-        // Zone transfer implementation
+
     }
     
-    // Subdomain brute force
+
     if brute {
         println!("\n{} Brute forcing subdomains...", "[*]".yellow());
         let common = vec![
@@ -489,7 +467,7 @@ async fn dns_command(domain: String, zone: bool, brute: bool, wordlist: Option<S
 
 async fn web_command(url: String, vuln: bool, dirb: bool, wordlist: Option<String>) -> Result<(), Box<dyn std::error::Error>> {
     println!("{}", "╔══════════════════════════════════════════════════════════╗".bright_blue());
-    println!("{}", "║                 WEB SCANNER v1.0                        ║".bright_blue());
+    println!("{}", "║                 WEB SCANNER v1.0                         ║".bright_blue());
     println!("{}", "╚══════════════════════════════════════════════════════════╝".bright_blue());
     println!();
     
@@ -504,7 +482,7 @@ async fn web_command(url: String, vuln: bool, dirb: bool, wordlist: Option<Strin
         .user_agent("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36")
         .build()?;
     
-    // Check if site is up
+
     match client.get(&url).send().await {
         Ok(response) => {
             println!("{} Site is up (HTTP {})", "[+]".green(), response.status());
@@ -523,7 +501,7 @@ async fn web_command(url: String, vuln: bool, dirb: bool, wordlist: Option<Strin
         }
     }
     
-    // Directory brute force
+
     if dirb {
         println!("\n{} Directory brute force...", "[*]".yellow());
         
@@ -547,11 +525,11 @@ async fn web_command(url: String, vuln: bool, dirb: bool, wordlist: Option<Strin
         }
     }
     
-    // Vulnerability scan
+
     if vuln {
         println!("\n{} Vulnerability scan...", "[*]".yellow());
         
-        // Check for common vulnerabilities
+    
         let checks = vec![
             ("/phpinfo.php", "PHP Info"),
             ("/info.php", "PHP Info"),
@@ -578,7 +556,7 @@ async fn web_command(url: String, vuln: bool, dirb: bool, wordlist: Option<Strin
 
 async fn geoip_command(ip: String) -> Result<(), Box<dyn std::error::Error>> {
     println!("{}", "╔══════════════════════════════════════════════════════════╗".bright_blue());
-    println!("{}", "║                 GEOLOCATION v1.0                        ║".bright_blue());
+    println!("{}", "║                 GEOLOCATION v1.0                         ║".bright_blue());
     println!("{}", "╚══════════════════════════════════════════════════════════╝".bright_blue());
     println!();
     
@@ -606,7 +584,7 @@ async fn geoip_command(ip: String) -> Result<(), Box<dyn std::error::Error>> {
 
 async fn mac_command(mac: String) -> Result<(), Box<dyn std::error::Error>> {
     println!("{}", "╔══════════════════════════════════════════════════════════╗".bright_blue());
-    println!("{}", "║                 MAC VENDOR LOOKUP v1.0                  ║".bright_blue());
+    println!("{}", "║                 MAC VENDOR LOOKUP v1.0                   ║".bright_blue());
     println!("{}", "╚══════════════════════════════════════════════════════════╝".bright_blue());
     println!();
     
@@ -629,7 +607,7 @@ async fn mac_command(mac: String) -> Result<(), Box<dyn std::error::Error>> {
 
 async fn speedtest_command() -> Result<(), Box<dyn std::error::Error>> {
     println!("{}", "╔══════════════════════════════════════════════════════════╗".bright_blue());
-    println!("{}", "║                 NETWORK SPEEDTEST v1.0                  ║".bright_blue());
+    println!("{}", "║                 NETWORK SPEEDTEST v1.0                   ║".bright_blue());
     println!("{}", "╚══════════════════════════════════════════════════════════╝".bright_blue());
     println!();
     
@@ -672,7 +650,7 @@ async fn speedtest_command() -> Result<(), Box<dyn std::error::Error>> {
 
 async fn capture_command(interface: String, count: usize) -> Result<(), Box<dyn std::error::Error>> {
     println!("{}", "╔══════════════════════════════════════════════════════════╗".bright_blue());
-    println!("{}", "║                 PACKET CAPTURE v1.0                     ║".bright_blue());
+    println!("{}", "║                 PACKET CAPTURE v1.0                      ║".bright_blue());
     println!("{}", "╚══════════════════════════════════════════════════════════╝".bright_blue());
     println!();
     
