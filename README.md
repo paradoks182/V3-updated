@@ -57,5 +57,5 @@ speedtest                  Test network bandwidth
 
 ```bash
 # Clone the repository
-git clone 
+git clone https://github.com/paradoks182/NetRust.git
 cd NetRust
